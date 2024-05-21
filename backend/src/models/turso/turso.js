@@ -11,17 +11,17 @@ const db = createClient({
     authToken: process.env.DB_TOKEN
 })
 
-const get = async ()=>{
+const getMessages = async ()=>{
     try{
         const data = await db.execute(`SELECT * FROM messages`)
     
         if(data.rows.length > 0){
             return { success: true, data}
         }else{
-            return { success: false, error: new Error('No messages found')}
+            return { success: false, message: 'message not found'}
         }
     }catch(e){
-        return { success: false, error: e}
+        return { success: false, message: 'Internal server error'}
     }
     
 }
@@ -33,22 +33,20 @@ const create = async (ms)=>{
             args: [ms]
         })
     
-        return { success: true, data: result.data}
+        return { success: true, data: result.data, message:'Send successful', data: ms}
 
     }catch(error){
-        return { success: true, error: error.message}
+        return { success: true, message: 'Interval server error'}
     }
 }
 
 const findUser = async (user) =>{
-    console.log('entramos a finduser: ', user)
     try{
         const find =  await db.execute({
             sql: `SELECT * FROM users WHERE user = ?`,
             args: [user]
         })
         if(find.rows.length > 0){
-            console.log('retorna succes true')
             return {success: true, data:find.rows[0].password}
         }else{
             return {success: false, message: 'Wrong password or username', state: 401}
@@ -59,24 +57,21 @@ const findUser = async (user) =>{
 }
 
 
-const register = (id, user, password) =>{
+const register = async (id, user, password) =>{
     try{
         const saveUser = db.execute({
             sql: `INSERT INTO users(id, user, password) VALUES(?,?,?)`,
             args: [id, user, password]
         })
     
-        return {success: true}
-
+        return {success: true, message: 'Successfully created'}
     }catch(error){
-        return error
+        return {success: false, message: 'Internal server error'}
     }
-    
 }
 
 
 const login =async  (user)=>{
-    console.log('entramos a login: ', user)
     try{
         const token = jwt.sign(user, process.env.JWT)
 
@@ -85,8 +80,6 @@ const login =async  (user)=>{
             user:user,
             token
         }
-
-        console.log('objeto del login: ', object.token)
 
         return {success: true, token: object.token, message: 'Successful login',state:200 }
 
@@ -97,7 +90,7 @@ const login =async  (user)=>{
 
 export {
     db,
-    get,
+    getMessages,
     create,
     findUser,
     register,

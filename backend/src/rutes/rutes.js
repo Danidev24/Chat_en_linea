@@ -2,33 +2,30 @@ import express from 'express';
 import { validateLogin, validateToken, validateUser } from '../schemas/chats.js';
 import { getAll, createMessage, registerUser, loginUser} from '../contorllers/controllers.js';
 import { randomUUID } from 'node:crypto';
+import { findUser } from '../models/turso/turso.js';
 
 const router = express.Router()
 
 router.get('/', validateToken, async(req, res)=>{
-    try{
-        const result = await getAll()
+    const result = await getAll()
 
-        if(result.success){
-            res.json(result.data)
-        }else{
-            res.status(404).send(result.error.message)
-        }
-    }catch(error){
-        res.status(500).send(error.message)
+    if(result.success){
+        res.json(result.data)
+    }else{
+        res.status(404).send(result.message)
     }
 })
 
 router.post('/', validateToken, async(req,res)=>{
-    
+
     const msg = req.body;
 
     const result = await createMessage(msg);
 
     if(result.success){
-        res.status(200).json({message: 'send succesfully', msg})
+        res.status(200).json({message: result.message, body: msg})
     }else{
-        res.status(500).json({error: result.error})
+        res.status(500).json({message: result.message})
     }
 })
 
@@ -45,9 +42,9 @@ router.post('/register', async (req,res) =>{
     const response = await registerUser(id, user, password);
 
     if(response.success){
-        res.status(201).json({ message: 'user created successfully', data: response.data })
+        res.status(201).json({ message: response.message, data: user })
     }else{
-        res.status(500).json({error: response.error})
+        res.status(500).json({error: response.message})
     }
 })
 
@@ -68,4 +65,11 @@ router.post('/login', async (req, res)=>{
     }
 })
 
+router.get('/profile/:userName', async (req,res)=>{
+    const result = await findUser()
+
+    if(result.success){
+        
+    }
+})
 export default router

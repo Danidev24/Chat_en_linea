@@ -1,31 +1,28 @@
 // aqui es donde creamos las funciones leer, crear, actualizar, 
 //y llamamos las funciones de la base de datos que se encuentran en modelos
 
-import {get, create, register, findUser, login} from '../models/turso/turso.js'
+import {getMessages, create, register, findUser, login} from '../models/turso/turso.js'
 
 
 const getAll = async ()=>{
 
-    const result = await get()
+    const result = await getMessages()
     if(result.success){
-        return {success: true, data: result.data}
+        return result
     }else{
-        return result.message
+        return result
     }
 }
 
 const createMessage = async (message)=>{
-    try{
-        const ms = message.content
 
-        const result = await create(ms)
-        if(result.success){
-            return {success: true, data: result.data}
-        }else{
-            return { success: false, error: 'Error creating message'}
-        }
-    }catch(error){
-        return { success: false, error: error.message}
+    const ms = message.content
+
+    const result = await create(ms)
+    if(result.success){
+        return result
+    }else{
+        return result
     }
 }
 
@@ -40,7 +37,7 @@ const registerUser = async (id, user, password)=>{
     const saveUser = await register(id, user, password);
 
     if(saveUser.success){
-        return {success: true, saveUser}
+        return saveUser
     }
 }
 
