@@ -32,10 +32,10 @@ await db.execute(`
 
 
 io.on('connection', async (socket)=>{
-    console.log('Un usuario se ha conectado')
+    console.log('User connected')
     
     socket.on('disconnect',()=>{
-        console.log('un usuario se desconectó')
+        console.log('User disconnected')
     })
 
     socket.on('chat message', async (msg)=>{
@@ -66,7 +66,7 @@ io.on('connection', async (socket)=>{
                 socket.emit('chat message', row.content, row.id.toString())
             });
         }catch (e){
-            console.error('no se pudieron recuperar los mensajes', e)
+            console.error('Internal server error', e)
             return
         }
     }
@@ -81,5 +81,5 @@ app.get('/', (req,res)=>{
 })
 
 server.listen(PORT, ()=>{
-    console.log(`escuchando en el puerto ${PORT}`)
+    console.log(`Listen on port ${PORT}`)
 })

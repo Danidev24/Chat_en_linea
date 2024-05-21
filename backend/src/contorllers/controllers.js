@@ -1,6 +1,3 @@
-// aqui es donde creamos las funciones leer, crear, actualizar, 
-//y llamamos las funciones de la base de datos que se encuentran en modelos
-
 import {getMessages, create, register, findUser, login, getInfoProfile, updateInfo} from '../models/turso/turso.js'
 
 

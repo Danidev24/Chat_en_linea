@@ -18,7 +18,7 @@ const getMessages = async ()=>{
         if(data.rows.length > 0){
             return { success: true, data}
         }else{
-            return { success: false, message: 'message not found'}
+            return { success: false, message: 'Messages not found'}
         }
     }catch(e){
         return { success: false, message: 'Internal server error'}
