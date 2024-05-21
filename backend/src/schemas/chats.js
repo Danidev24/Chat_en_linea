@@ -68,7 +68,6 @@ export const validateUP= zod.object({
     })
 })
 
-
 export const validateUser = (data)=>{
     return validateData.safeParse(data)
 }

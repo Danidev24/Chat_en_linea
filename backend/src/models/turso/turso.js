@@ -88,12 +88,42 @@ const login =async  (user)=>{
     }
 }
 
+const getInfoProfile = async(name)=>{
+    try{
+        const user = await db.execute({
+            sql: `SELECT * FROM users WHERE user=?`,
+            args: [name]
+        })
+
+        if(user.rows.length > 0){
+            return {success: true, user: user.rows[0].user, image: user.rows[0].image, state: 200}
+        }else{
+            return {success: false, message: 'Not information found', state: 404}
+        }
+    }catch (err){
+        return {success: false, message: 'Internal server error', state: 500}
+    }
+}
+
+const updateInfo = async (userName, image)=>{
+    try{
+        const result = await db.execute({
+            sql: `UPDATE users SET image=? WHERE user=?`,
+            args:[image, userName]
+        })
+        return { success: true, data: image, state: 200, message: 'Update successful'}
+    }catch(e){
+        return {success: false, message: 'Internal server error', state: 500}
+    }
+}
+
 export {
     db,
     getMessages,
     create,
     findUser,
     register,
-    login
-
+    login,
+    getInfoProfile,
+    updateInfo
 }

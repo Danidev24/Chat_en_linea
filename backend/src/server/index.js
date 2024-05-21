@@ -77,41 +77,7 @@ app.use(logger('dev'))
 app.use('/chat', rutes)
 
 app.get('/', (req,res)=>{
-    res.send('Estamos en la pagina principal')
-})
-
-app.get('/chat/profile/:userName', async (req, res)=>{
-    const name = req.params.userName;
-    try{
-        const user = await db.execute({
-            sql: `SELECT * FROM users WHERE user=?`,
-            args: [name]
-        })
-        res.json({
-            user: user.rows[0].user,
-            image: user.rows[0].image
-        });
-    }catch (err){
-        console.log('error: ', err)
-        res.send('error')
-    }
-})
-
-app.put('/chat/profile/:idUser', async (req, res)=>{
-    const id = req.params.idUser;
-    const { image } = req.body;
-
-    try{
-        const result = await db.execute({
-            sql: `UPDATE users SET image=? WHERE id=?`,
-            args:[image, id]
-        })
-        console.log('update succesfully', result)
-        res.json('Update succesfully')
-    }catch(e){
-        console.log('error: ', e)
-        res.send('error')
-    }
+    res.send('Welcome chat Danidev')
 })
 
 server.listen(PORT, ()=>{
