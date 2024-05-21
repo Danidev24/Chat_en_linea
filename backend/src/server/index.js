@@ -2,13 +2,8 @@ import express from 'express';
 import logger from 'morgan';
 import { Server } from 'socket.io';
 import { createServer } from 'node:http';
-import dotenv from 'dotenv';
-import { createClient } from '@libsql/client';
-import { randomUUID } from 'node:crypto';
-import { validateUser, validateToken } from '../schemas/chats.js';
-import jwt from 'jsonwebtoken';
-
-dotenv.config();
+import rutes from '../rutes/rutes.js'
+import { db } from '../models/turso/turso.js';
 
 const PORT = process.env.PORT ?? 3000
 
@@ -17,12 +12,6 @@ app.use(express.json())
 const server = createServer(app)
 const io = new Server(server,{
     connectionStateRecovery:{}
-})
-
-
-const db = createClient({
-    url: process.env.URL,
-    authToken: process.env.DB_TOKEN
 })
 
 await db.execute(`
@@ -40,6 +29,7 @@ await db.execute(`
         image BLOB
     )
 `)
+
 
 io.on('connection', async (socket)=>{
     console.log('Un usuario se ha conectado')
@@ -84,108 +74,10 @@ io.on('connection', async (socket)=>{
 
 app.use(logger('dev'))
 
-app.get('/chat', validateToken, async (req,res)=>{
-    const data = await db.execute(`SELECT * FROM messages`)
+app.use('/chat', rutes)
 
-    if(data.rows.length > 0){
-        res.json(data);
-    }else{
-    res.send('Not found messages')
-    }
-})
-
-app.post('/chat', async(req,res)=>{
-    const msg = req.body;
-
-    console.log(msg)
-
-    let result;
-    try{
-        result  = await db.execute({
-            sql: 'INSERT INTO messages(content) VALUES(?)',
-            args: [msg.content]
-        })
-        res.send('send succesfully')
-
-    }catch (err){
-        console.error('Error al agregar datos.', err);
-        res.status(500).send('Error al agregar datos');
-    }
-})
-
-// app.get('/', (req,res)=>{
-//     res.send('Estamos en la pagina principal')
-// })
-
-app.get('/', (req, res) => {
-    res.sendFile(process.cwd() + '/src/client/index.html')
-  })
-
-app.post('/chat/register', async (req,res)=>{
-
-    const id = randomUUID()
-    const result = validateUser(req.body)
-    const {user, password } = req.body;
-
-    if (!result.success) {
-        return res.status(400).json({ error: JSON.parse(result.error.message)});
-    }
-
-    try{
-        console.log('entramos acá')
-        const find =  await db.execute({
-            sql: `SELECT * FROM users WHERE user = ?`,
-            args: [user]
-        })
-
-        if(find.rows.length > 0){
-            return res.json('User already exists')
-        }
-
-        const save = db.execute({
-            sql: `INSERT INTO users(id, user, password) VALUES(?,?,?)`,
-            args: [id, user, password]
-        })
-
-        res.status(201).json({ message: 'user created successfully', data: save })
-
-    }catch(error){
-        console.log('error: ', error)
-    }
-})
-
-app.post('/chat/login', async (req,res)=>{
-    const {user, password} = req.body;
-    const pass = password;
-
-    try{
-        const find  = await db.execute({
-            sql: `SELECT * FROM users WHERE user=?`,
-            args: [user]
-        })
-
-
-        if(find.rows.length === 0 || pass != find.rows[0].password){
-            return res.status(404).json('User not found or invalid password')
-        }
-
-        const userForToken = {
-            user: find.rows[0].user
-        }
-
-        // const time = '24h'
-        const token = jwt.sign(userForToken, process.env.JWT)
-
-        return res.send({
-            message: 'Login successful',
-            user : find.rows[0].user,
-            token
-        })
-    }catch(error){
-        console.log('error', error)
-        res.status(500).json({ error: 'Internal server error' })
-    }
-    
+app.get('/', (req,res)=>{
+    res.send('Estamos en la pagina principal')
 })
 
 app.get('/chat/profile/:userName', async (req, res)=>{

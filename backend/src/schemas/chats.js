@@ -44,8 +44,6 @@ export const validateToken =(req,res,next)=>{
         return res.status(401).json({ error: 'Access denied or not access token provided.'})
     }
 
-    console.log(typeof accessToken)
-
     const token = accessToken.substring(7)
 
     jwt.verify(token, process.env.JWT, (err, decoded)=>{
@@ -58,9 +56,23 @@ export const validateToken =(req,res,next)=>{
     })
 }
 
+export const validateUP= zod.object({
+    user: zod.string({
+        invalid_type_error: 'User must be a string.',
+        required_error: 'User is requerid.'
+    }),
 
+    password: zod.string({
+        invalid_type_error: 'Password must be a string.',
+        required_error: 'Password is requerid.'
+    })
+})
 
 
 export const validateUser = (data)=>{
     return validateData.safeParse(data)
+}
+
+export const validateLogin = (data)=>{
+    return validateUP.safeParse(data)
 }
